@@ -1,0 +1,151 @@
+1942: function(e, t, a) {
+        "use strict";
+        Object.defineProperty(t, "__esModule", {
+            value: !0
+        }),
+        t.TransactionManagerProvider = t.useTransactionManager = t.TransactionManagerContext = void 0;
+        let r = a(5893)
+          , n = a(7294)
+          , i = a(5369);
+        function c(e, t) {
+            switch (t.type) {
+            case "add_transaction":
+                {
+                    let a = e.hashes.add(t.hash)
+                      , r = e.transactions.set(t.hash, {
+                        hash: t.hash,
+                        metadata: t.metadata
+                    });
+                    return {
+                        ...e,
+                        hashes: a,
+                        transactions: r
+                    }
+                }
+            case "remove_transaction":
+                {
+                    let a = e.hashes.remove(t.hash)
+                      , r = e.transactions.delete(t.hash);
+                    return {
+                        ...e,
+                        hashes: a,
+                        transactions: r
+                    }
+                }
+            default:
+                return e
+            }
+        }
+        t.TransactionManagerContext = (0,
+        n.createContext)({
+            transactions: [],
+            hashes: [],
+            addTransaction: ({hash: e, metadata: t})=>void 0,
+            removeTransaction: ({hash: e})=>void 0
+        }),
+        t.useTransactionManager = function() {
+            let e = (0,
+            n.useContext)(t.TransactionManagerContext);
+            if (!e)
+                throw Error("useTransactionManager must be used inside TransactionManagerProvider");
+            return e
+        }
+        ,
+        t.TransactionManagerProvider = function({children: e}) {
+            let[a,f] = (0,
+            n.useReducer)(c, {
+                hashes: (0,
+                i.OrderedSet)(),
+                transactions: (0,
+                i.OrderedMap)()
+            })
+              , d = (0,
+            n.useCallback)(({hash: e, metadata: t})=>{
+                f({
+                    type: "add_transaction",
+                    hash: e,
+                    metadata: t
+                })
+            }
+            , [f])
+              , s = (0,
+            n.useCallback)(({hash: e})=>{
+                f({
+                    type: "remove_transaction",
+                    hash: e
+                })
+            }
+            , [f])
+              , o = t.TransactionManagerContext.Provider
+              , u = a.transactions;
+            return (0,
+            r.jsx)(o, {
+                value: {
+                    transactions: u.valueSeq().toArray(),
+                    hashes: u.keySeq().toArray(),
+                    addTransaction: d,
+                    removeTransaction: s
+                },
+                children: e
+            })
+        }
+    },
+    4979: function(e, t, a) {
+        "use strict";
+        Object.defineProperty(t, "__esModule", {
+            value: !0
+        });
+        var r = a(8902)
+          , n = a(9095);
+        class i extends r.Subscribable {
+            constructor() {
+                super(),
+                this.setup = e=>{
+                    if (!n.isServer && window.addEventListener) {
+                        let t = ()=>e();
+                        return window.addEventListener("visibilitychange", t, !1),
+                        window.addEventListener("focus", t, !1),
+                        ()=>{
+                            window.removeEventListener("visibilitychange", t),
+                            window.removeEventListener("focus", t)
+                        }
+                    }
+                }
+            }
+            onSubscribe() {
+                this.cleanup || this.setEventListener(this.setup)
+            }
+            onUnsubscribe() {
+                if (!this.hasListeners()) {
+                    var e;
+                    null == (e = this.cleanup) || e.call(this),
+                    this.cleanup = void 0
+                }
+            }
+            setEventListener(e) {
+                var t;
+                this.setup = e,
+                null == (t = this.cleanup) || t.call(this),
+                this.cleanup = e(e=>{
+                    "boolean" == typeof e ? this.setFocused(e) : this.onFocus()
+                }
+                )
+            }
+            setFocused(e) {
+                this.focused = e,
+                e && this.onFocus()
+            }
+            onFocus() {
+                this.listeners.forEach(e=>{
+                    e()
+                }
+                )
+            }
+            isFocused() {
+                return "boolean" == typeof this.focused ? this.focused : "undefined" == typeof document || [void 0, "visible", "prerender"].includes(document.visibilityState)
+            }
+        }
+        let c = new i;
+        t.FocusManager = i,
+        t.focusManager = c
+    },
